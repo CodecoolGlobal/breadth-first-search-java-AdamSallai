@@ -2,21 +2,19 @@ package com.codecool.bfsexample;
 
 import com.codecool.bfsexample.model.UserNode;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class BFSExample {
     private static List<UserNode> users;
+    private static GraphPlotter graphPlotter;
     private static void populateDB() {
 
         RandomDataGenerator generator = new RandomDataGenerator();
         users = generator.generate();
 
-        GraphPlotter graphPlotter = new GraphPlotter(users);
+        graphPlotter = new GraphPlotter(users);
         
         System.out.println("Done!");
     }
@@ -32,14 +30,16 @@ public class BFSExample {
         UserNode firstUser = users.get(first);
         UserNode secondUser = users.get(second);
         System.out.println("\n===================");
-        getMinimumDistance(firstUser, secondUser);
+        System.out.println(getMinimumDistance(firstUser, secondUser));
         System.out.println("\n===================");
-        getFriendsOfFriendsAtGivenDistance(firstUser, 3);
+        Set<UserNode> friendsOfFriendsAtGivenDistance = getFriendsOfFriendsAtGivenDistance(firstUser, 2);
+        graphPlotter.highlightNodes(friendsOfFriendsAtGivenDistance, firstUser);
+        System.out.println(friendsOfFriendsAtGivenDistance);
         System.out.println("\n===================");
         getShortestPathsBetweenUsers(firstUser, secondUser);
     }
 
-    private static void getMinimumDistance(UserNode firstUser, UserNode secondUser) {
+    private static int getMinimumDistance(UserNode firstUser, UserNode secondUser) {
         System.out.println("The minimum distance between "+ firstUser.getFullName() + " and " + secondUser.getFullName()+":");
 
         int distance = 0;
@@ -61,10 +61,10 @@ public class BFSExample {
             }
             usersToVisit = friendsOfFriends;
         }
-        System.out.println(distance);
+        return distance;
     }
 
-    private static void getFriendsOfFriendsAtGivenDistance(UserNode firstUser, int distance) {
+    private static Set<UserNode> getFriendsOfFriendsAtGivenDistance(UserNode firstUser, int distance) {
         System.out.println(firstUser.getFullName()+"'s friends of friends at the distance of "+ distance +":");
 
         Set<UserNode> visitedUsers = new HashSet<>();
@@ -79,10 +79,38 @@ public class BFSExample {
             }
             friendsOfFriends = temporaryFriendsOfFriends;
         }
-        System.out.println(friendsOfFriends);
+        return friendsOfFriends;
     }
 
     private static void getShortestPathsBetweenUsers(UserNode firstUser, UserNode secondUser) {
         System.out.println("Shortest paths between "+ firstUser.getFullName() + " and " + secondUser.getFullName()+":");
+
+        List<List<UserNode>> listOfPaths = new ArrayList<>();
+
+        List<UserNode> path = new ArrayList<>();
+        pathFinder(firstUser, secondUser, path, listOfPaths);
+
+        System.out.println(listOfPaths);
+    }
+
+    private static void pathFinder(UserNode current, UserNode secondUser, List<UserNode> path, List<List<UserNode>> listOfPaths) {
+        if (listOfPaths.size() != 0 && listOfPaths.get(0).size() < path.size()) {
+            return;
+        }
+        if (current.equals(secondUser)) {
+            path.add(current);
+            if (listOfPaths.size() != 0 && path.size() < listOfPaths.get(0).size()) {
+                listOfPaths.clear();
+            }
+            listOfPaths.add(path);
+        } else {
+            for (UserNode friend : current.getFriends()) {
+                if (!path.contains(friend)) {
+                    List<UserNode> newPath = new ArrayList<>(path);
+                    newPath.add(current);
+                    pathFinder(friend, secondUser, newPath, listOfPaths);
+                }
+            }
+        }
     }
 }
