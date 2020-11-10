@@ -34,7 +34,7 @@ public class BFSExample {
         System.out.println("\n===================");
         getMinimumDistance(firstUser, secondUser);
         System.out.println("\n===================");
-        getFriendsOfFriendsAtGivenDistance(firstUser, 2);
+        getFriendsOfFriendsAtGivenDistance(firstUser, 3);
         System.out.println("\n===================");
         getShortestPathsBetweenUsers(firstUser, secondUser);
     }
@@ -48,7 +48,7 @@ public class BFSExample {
         Set<UserNode> usersToVisit = firstUser.getFriends();
         boolean found = false;
 
-        while(!found) {
+        while(!found && visitedUsers.size() != users.size()) {
             distance++;
             Set<UserNode> friendsOfFriends = new HashSet<>();
             for (UserNode userNode : usersToVisit) {
@@ -66,6 +66,20 @@ public class BFSExample {
 
     private static void getFriendsOfFriendsAtGivenDistance(UserNode firstUser, int distance) {
         System.out.println(firstUser.getFullName()+"'s friends of friends at the distance of "+ distance +":");
+
+        Set<UserNode> visitedUsers = new HashSet<>();
+        visitedUsers.add(firstUser);
+        Set<UserNode> friendsOfFriends = firstUser.getFriends();
+
+        for (int i = 1; i < distance; i++) {
+            Set<UserNode> temporaryFriendsOfFriends = new HashSet<>();
+            for (UserNode userNode : friendsOfFriends) {
+                visitedUsers.add(userNode);
+                temporaryFriendsOfFriends.addAll(userNode.getFriends().stream().filter(userNode1 -> !visitedUsers.contains(userNode1)).collect(Collectors.toSet()));
+            }
+            friendsOfFriends = temporaryFriendsOfFriends;
+        }
+        System.out.println(friendsOfFriends);
     }
 
     private static void getShortestPathsBetweenUsers(UserNode firstUser, UserNode secondUser) {
