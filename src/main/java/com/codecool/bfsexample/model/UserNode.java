@@ -1,6 +1,7 @@
 package com.codecool.bfsexample.model;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class UserNode {
@@ -50,5 +51,24 @@ public class UserNode {
 
     public String toString() {
         return firstName + "_" + lastName + " (" + id + ")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserNode userNode = (UserNode) o;
+        return id == userNode.id &&
+                Objects.equals(firstName, userNode.firstName) &&
+                Objects.equals(lastName, userNode.lastName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName);
+    }
+
+    public String getFullName() {
+        return firstName + " " + lastName;
     }
 }
